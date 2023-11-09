@@ -400,7 +400,10 @@ def model_forward_with_context(
     encoding_context = null_context if not freeze else torch.no_grad
 
     with encoding_context():
-        enc = fn(*args)
+        if 'input_ids' in args[0]:
+            enc = fn(**args[0])
+        else:
+            enc = fn(*args)
 
         if freeze:
             enc.detach_()
