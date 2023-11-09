@@ -610,11 +610,11 @@ class CLIP(nn.Module):
         aug_text = None,                # augmented text (for multiview)
         aug_image = None                # augmented image (for multiview)
     ):
-        batch, device = text.shape[0], text.device
+        batch, device = image.shape[0], image.device
 
         # derive text mask
 
-        text_mask = text != self.text_pad_id
+        text_mask = text['attention_mask'] if 'attention_mask' in text else text != self.text_pad_id
 
         # ssl
 
@@ -622,7 +622,10 @@ class CLIP(nn.Module):
         image_ssl_loss = 0
 
         if return_loss:
-            text_ssl_loss = self.mlm(text, mask = text_mask) if self.use_mlm else 0
+            if 'input_ids' in text:
+                text_ssl_loss = self.mlm(text['input_ids'], mask = text_mask) if self.use_mlm else 0
+            else:
+                text_ssl_loss = self.mlm(text, mask = text_mask) if self.use_mlm else 0
             image_ssl_loss = self.visual_ssl(image) if self.use_visual_ssl else 0
 
         # concat augmented texts and images and do some asserts
