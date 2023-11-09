@@ -401,7 +401,7 @@ def model_forward_with_context(
 
     with encoding_context():
         if 'input_ids' in args[0]:
-            enc = fn(**args[0])
+            enc = fn(**args[0])['last_hidden_state']
         else:
             enc = fn(*args)
 
